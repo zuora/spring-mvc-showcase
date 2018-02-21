@@ -26,17 +26,29 @@ The steps to get this working with contrast are;
 1. git clone git://github.com/SpringSource/spring-mvc-showcase.git
 2. Download the Java contrast agent from TeamServer
 3. Add the Contrast Agent to MAVEN_OPTS e.g.
-    export MAVEN_OPTS="Xms4G -javaagent:<PathToAgent>/contrast.jar -Dcontrast.appname=spring-mvc-showcase -Dcontrast.server=serverName"
+
+    export MAVEN_OPTS="-Xms4G -javaagent:<PathToAgent>/contrast.jar -Dcontrast.appname=spring-mvc-showcase -Dcontrast.server=serverName"
+
     serverName is the name of the server where the agent will run (as seen by TeamServer, usually the hostname)
 4. Update the pom.xml file to reflect your serverName and the connection details for your TeamServer instance;
+
         username
+
         apiKey
+
         serviceKey
+
         apiUrl
+
         orgUuid
+
+
 5. Run the application;
+
     $ cd spring-mvc-showcase
+
     $ mvn jetty:run
+
     Access the deployed web application at: http://localhost:8080/spring-mvc-showcase/
 6. From TeamsServer, apply a license to spring-mvc-showcase.
 7. Test with "verify"
