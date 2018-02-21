@@ -256,6 +256,48 @@
 					</webApp>
 				</configuration>
 			</plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-failsafe-plugin</artifactId>
+                                <version>2.20.1</version>
+                                <executions>
+                                  <execution>
+                                    <goals>
+                                      <goal>integration-test</goal>
+                                      <goal>verify</goal>
+                                    </goals>
+                                  </execution>
+                                </executions>
+                        </plugin>
+                        <plugin>
+                            <groupId>com.contrastsecurity</groupId>
+                            <artifactId>contrast-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>install-contrast-jar</id>
+                                    <goals>
+                                        <goal>install</goal>
+                                    </goals>
+                                </execution>
+                                <execution>
+                                    <id>verify-with-contrast</id>
+                                    <phase>post-integration-test</phase>
+                                    <goals>
+                                        <goal>verify</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <username>yourTeamServerLogin</username>
+                                <apiKey>yourApiKey</apiKey>
+                                <serviceKey>yourServiceKey</serviceKey>
+                                <apiUrl>https://app.contrastsecurity.com/Contrast/api</apiUrl>
+                                <orgUuid>orgID</orgUuid>
+                                <appName>spring-mvc-showcase</appName>
+                                <serverName>serverName</serverName>
+                                <minSeverity>Medium</minSeverity>
+                            </configuration>
+                        </plugin>
 		</plugins>
 	</build>
 </project>
