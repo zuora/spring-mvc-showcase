@@ -7,3 +7,5 @@ target
 src/main/webapp/META-INF
 .idea
 *.iml
+mvn_settings.xml
+contrast.jar

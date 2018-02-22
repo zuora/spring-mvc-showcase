@@ -23,38 +23,41 @@ At initiation of this project there are no failsafe tests written.
 Contrast Steps
 --------------
 The steps to get this working with contrast are;
-1. git clone git://github.com/SpringSource/spring-mvc-showcase.git
-2. Download the Java contrast agent from TeamServer
-3. Add the Contrast Agent to MAVEN_OPTS e.g.
 
-    export MAVEN_OPTS="-Xms4G -javaagent:<PathToAgent>/contrast.jar -Dcontrast.appname=spring-mvc-showcase -Dcontrast.server=serverName"
+1. Clone the repository
 
-    serverName is the name of the server where the agent will run (as seen by TeamServer, usually the hostname)
-4. Update the pom.xml file to reflect your serverName and the connection details for your TeamServer instance;
+    `git clone git://github.com/SpringSource/spring-mvc-showcase.git`
 
-        username
+2. Download the Java contrast agent from the Contrast TeamServer dashboard.
+3. Add the Contrast Agent to `MAVEN_OPTS`. Setting `MAVEN_OPTS` is necessary only for the first time you run the server. In the example below, replace `severName` with the name of the server where the agent will run (as seen by TeamServer, usually the hostname).
 
-        apiKey
+    `export MAVEN_OPTS="-Xms4G -javaagent:<PathToAgent>/contrast.jar -Dcontrast.appname=spring-mvc-showcase -Dcontrast.server=serverName"`
 
-        serviceKey
+4. Copy the `mvn_settings_template.xml` file to `mvn_settings.xml`
 
-        apiUrl
+5. Update the properties in `mvn_setting.xml` to reflect your serverName and the connection details for your TeamServer instance.
 
-        orgUuid
+    `<contrastUsername>your_contrast_username</contrastUsername>`
 
+    `<contrastApiUrl>https://app.contrastsecurity.com/Contrast/api</contrastApiUrl>`
 
-5. Run the application;
+    `<contrastApiKey>your_contrast_api_key</contrastApiKey>`
 
-    $ cd spring-mvc-showcase
+    `<contrastServiceKey>your_contrast_service_key</contrastServiceKey>`
 
-    $ mvn jetty:run
+    `<contrastOrgUuid>your_contrast_org_uuid</contrastOrgUuid>`
 
-    Access the deployed web application at: http://localhost:8080/spring-mvc-showcase/
-6. From TeamsServer, apply a license to spring-mvc-showcase.
-7. Test with "verify"
+    `<contrastServerName>localhost</contrastServerName>`
 
+6. Run the application. This step is necessary only once, after the application shows up in the Contrast TeamServer dashboard it is no longer necessary.
 
+    `$ cd spring-mvc-showcase`
+    `$ mvn cargo:run -s mvn_settings.xml`
 
+7. Access the deployed web application at: [http://localhost:8080/spring-mvc-showcase/](http://localhost:8080/spring-mvc-showcase/). As with the previous step, this is necessary only once. However, you MUST access the application at least once otherwise it will not show up in the Contrast TeamServer dashboard.
+8. From the Contrast TeamsServer dashboard, apply a license to `spring-mvc-showcase`.
+9. You can `unset MAVEN_OPTS` at this point.
+10. Run the maven surefire and failsafe tests with `mvn verify -s mvn_settings.xml`
 
 ________________________
 ORIGINAL below this line

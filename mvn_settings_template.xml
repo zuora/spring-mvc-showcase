@@ -1,0 +1,21 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <contrastUsername>your_contrast_username</contrastUsername>
+        <contrastApiUrl>https://app.contrastsecurity.com/Contrast/api</contrastApiUrl>
+        <contrastApiKey>your_contrast_api_key</contrastApiKey>
+        <contrastServiceKey>your_contrast_service_key</contrastServiceKey>
+        <contrastOrgUuid>your_contrast_org_uuid</contrastOrgUuid>
+        <contrastServerName>localhost</contrastServerName>
+      </properties>
+    </profile>
+  </profiles>
+</settings>

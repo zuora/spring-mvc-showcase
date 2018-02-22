@@ -7,13 +7,18 @@
 	<name>spring-mvc-showcase</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
-
 	<properties>
 		<java-version>1.8</java-version>
 		<org.springframework-version>5.0.3.RELEASE</org.springframework-version>
 		<org.aspectj-version>1.8.1</org.aspectj-version>
+		<contrastUsername>yourContrastUsername</contrastUsername>
+		<contrastApiUrl>https://app.contrastsecurity.com/Contrast/api</contrastApiUrl>
+		<contrastApiKey>yourContrastApiKey</contrastApiKey>
+		<contrastServiceKey>yourContrastServiceKey</contrastServiceKey>
+		<contrastOrgUuid>orgID</contrastOrgUuid>
+		<contrastAppName>spring-mvc-showcase</contrastAppName>
+		<contrastServerName>localhost</contrastServerName>
 	</properties>
-
 	<dependencies>
 		<!-- Spring -->
 		<dependency>
@@ -26,21 +31,18 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${org.springframework-version}</version>
 		</dependency>
-
 		<!-- Spring Security (used for CSRF protection only) -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 			<version>5.0.0.RELEASE</version>
 		</dependency>
-
 		<!-- AspectJ -->
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>${org.aspectj-version}</version>
 		</dependency>
-		
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -52,14 +54,12 @@
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>LATEST</version>
 		</dependency>
-
 		<!-- @Inject -->
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
 		</dependency>
-				
 		<!-- Servlet API -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -78,21 +78,18 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
-
 		<!-- Jackson JSON Processor -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.9.3</version>
 		</dependency>
-
 		<!-- Rome Atom+RSS -->
 		<dependency>
 			<groupId>com.rometools</groupId>
 			<artifactId>rome</artifactId>
 			<version>1.9.0</version>
 		</dependency>
-		
 		<!-- JSR 303 with Hibernate Validator -->
 		<dependency>
 			<groupId>javax.validation</groupId>
@@ -114,14 +111,12 @@
 			<artifactId>javax.el</artifactId>
 			<version>3.0.1-b08</version>
 		</dependency>
-
 		<!-- Joda Time Library -->
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.9.9</version>
 		</dependency>
-
 		<!-- File Upload -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -133,8 +128,6 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.5</version>
 		</dependency>
-
-			
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -160,14 +153,29 @@
 			<version>2.4.0</version>
 			<scope>test</scope>
 		</dependency>
-  		<dependency>
+		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
 			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client</artifactId>
+				<version>3.1.4.Final</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
@@ -246,6 +254,10 @@
 					<target>${java-version}</target>
 				</configuration>
 			</plugin>
+			<!-- This option for running the app during integration tests will not instrument with Contrast unless the MAVEN_OPTS environment variable is set. -->
+			<!-- For example: export MAVEN_OPTS=-javaagent:contrast.jar -Dcontrast.appname=spring-mvc-showcase -Dcontrast.server=localhost -->
+			<!-- This may be inconvenient to some. Thus, the use of the cargo-maven2-plugin below. -->
+			<!--
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
@@ -254,50 +266,170 @@
 					<webApp>
 						<contextPath>/${project.artifactId}</contextPath>
 					</webApp>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<stopKey>foo</stopKey>
+					<stopPort>9999</stopPort>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<scanIntervalSeconds>0</scanIntervalSeconds>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
+			<!-- This option did not work because the integration tests would not wait until the Jetty server was fully started. Thus, the use of the cargo-maven2-plugin below. -->
+			<!--
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.4.8.v20171121</version>
+				<configuration>
+					<webApp>
+						<contextPath>/${project.artifactId}</contextPath>
+					</webApp>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<stopKey>foo</stopKey>
+					<stopPort>9999</stopPort>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run-forked</goal>
+						</goals>
+						<configuration>
+							<waitForChild>false</waitForChild>
+							<jvmArgs>-Xms4G -javaagent:target/contrast.jar
+								-Dcontrast.appname=${contrastAppName}
+								-Dcontrast.server=${contrastServerName}</jvmArgs>
+							<scanIntervalSeconds>0</scanIntervalSeconds>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<configuration>
+					<container>
+						<containerId>jetty9x</containerId>
+						<log>target/cargo.log</log>
+						<logLevel>debug</logLevel>
+						<zipUrlInstaller>
+							<url>http://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.8.v20171121/jetty-distribution-9.4.8.v20171121.tar.gz</url>
+							<downloadDir>${project.build.directory}/downloads</downloadDir>
+							<extractDir>${project.build.directory}/extracts</extractDir>
+						</zipUrlInstaller>
+					</container>
+					<configuration>
+						<home>${project.build.directory}/jetty9x/container</home>
+						<properties>
+							<cargo.servlet.port>8080</cargo.servlet.port>
+							<cargo.start.jvmargs>-javaagent:${project.build.directory}/contrast.jar -Dcontrast.appname=${contrastAppName} -Dcontrast.server=${contrastServerName}</cargo.start.jvmargs>
+							<cargo.logging>high</cargo.logging>
+						</properties>
+					</configuration>
+					<deployables>
+						<deployable>
+							<groupId>org.springframework.samples</groupId>
+							<artifactId>spring-mvc-showcase</artifactId>
+							<type>war</type>
+							<properties>
+								<context>spring-mvc-showcase</context>
+							</properties>
+						</deployable>
+					</deployables>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.20.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.contrastsecurity</groupId>
+				<artifactId>contrast-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-contrast-jar</id>
+						<goals>
+							<goal>install</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify-with-contrast</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<username>${contrastUsername}</username>
+					<apiKey>${contrastApiKey}</apiKey>
+					<serviceKey>${contrastServiceKey}</serviceKey>
+					<apiUrl>${contrastApiUrl}</apiUrl>
+					<orgUuid>${contrastOrgUuid}</orgUuid>
+					<appName>spring-mvc-showcase</appName>
+					<serverName>${contrastServerName}</serverName>
+					<minSeverity>Medium</minSeverity>
 				</configuration>
 			</plugin>
-                        <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-failsafe-plugin</artifactId>
-                                <version>2.20.1</version>
-                                <executions>
-                                  <execution>
-                                    <goals>
-                                      <goal>integration-test</goal>
-                                      <goal>verify</goal>
-                                    </goals>
-                                  </execution>
-                                </executions>
-                        </plugin>
-                        <plugin>
-                            <groupId>com.contrastsecurity</groupId>
-                            <artifactId>contrast-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>install-contrast-jar</id>
-                                    <goals>
-                                        <goal>install</goal>
-                                    </goals>
-                                </execution>
-                                <execution>
-                                    <id>verify-with-contrast</id>
-                                    <phase>post-integration-test</phase>
-                                    <goals>
-                                        <goal>verify</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <username>yourTeamServerLogin</username>
-                                <apiKey>yourApiKey</apiKey>
-                                <serviceKey>yourServiceKey</serviceKey>
-                                <apiUrl>https://app.contrastsecurity.com/Contrast/api</apiUrl>
-                                <orgUuid>orgID</orgUuid>
-                                <appName>spring-mvc-showcase</appName>
-                                <serverName>serverName</serverName>
-                                <minSeverity>Medium</minSeverity>
-                            </configuration>
-                        </plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.6.6</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>
